@@ -33,7 +33,7 @@ public class StatementPrinterTests
         var statementService = new StatementService();
         var txtFormatter = new TextStatementFormatter();
         var xmlFormatter = new XmlStatementFormatter();
-        var statementPrinter = new StatementPrinter(statementService,txtFormatter,xmlFormatter);
+        var statementPrinter = new StatementPrinter(statementService, txtFormatter, xmlFormatter);
         var result = statementPrinter.Print(invoice, plays);
 
         Approvals.Verify(result);
@@ -73,7 +73,6 @@ public class StatementPrinterTests
         Approvals.Verify(result);
     }
 
-
     [Fact]
     [UseReporter(typeof(DiffReporter))]
     public void TestXmlStatementExample()
@@ -108,4 +107,72 @@ public class StatementPrinterTests
         Approvals.Verify(result);
     }
 
+    [Fact]
+    [UseReporter(typeof(DiffReporter))]
+    public void TestEmptyInvoice()
+    {
+        var plays = new Dictionary<string, Play>();
+        plays.Add("hamlet", new Play("Hamlet", 4024, "tragedy"));
+        plays.Add("as-like", new Play("As You Like It", 2670, "comedy"));
+        plays.Add("othello", new Play("Othello", 3560, "tragedy"));
+
+        Invoice invoice = new Invoice("BigCo", new List<Performance>());
+
+        var statementService = new StatementService();
+        var txtFormatter = new TextStatementFormatter();
+        var xmlFormatter = new XmlStatementFormatter();
+        var statementPrinter = new StatementPrinter(statementService, txtFormatter, xmlFormatter);
+        var result = statementPrinter.PrintTxt(invoice, plays);
+
+        Approvals.Verify(result);
+    }
+
+    [Fact]
+    [UseReporter(typeof(DiffReporter))]
+    public void TestSinglePerformance()
+    {
+        var plays = new Dictionary<string, Play>();
+        plays.Add("hamlet", new Play("Hamlet", 4024, "tragedy"));
+
+        Invoice invoice = new Invoice(
+            "BigCo",
+            new List<Performance>
+            {
+                new Performance("hamlet", 55)
+            }
+        );
+
+        var statementService = new StatementService();
+        var txtFormatter = new TextStatementFormatter();
+        var xmlFormatter = new XmlStatementFormatter();
+        var statementPrinter = new StatementPrinter(statementService, txtFormatter, xmlFormatter);
+        var result = statementPrinter.PrintTxt(invoice, plays);
+
+        Approvals.Verify(result);
+    }
+
+    [Fact]
+    [UseReporter(typeof(DiffReporter))]
+    public void TestMultiplePerformancesSamePlay()
+    {
+        var plays = new Dictionary<string, Play>();
+        plays.Add("hamlet", new Play("Hamlet", 4024, "tragedy"));
+
+        Invoice invoice = new Invoice(
+            "BigCo",
+            new List<Performance>
+            {
+                new Performance("hamlet", 55),
+                new Performance("hamlet", 35)
+            }
+        );
+
+        var statementService = new StatementService();
+        var txtFormatter = new TextStatementFormatter();
+        var xmlFormatter = new XmlStatementFormatter();
+        var statementPrinter = new StatementPrinter(statementService, txtFormatter, xmlFormatter);
+        var result = statementPrinter.PrintTxt(invoice, plays);
+
+        Approvals.Verify(result);
+    }
 }
